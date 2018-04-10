@@ -1,4 +1,4 @@
-import socket
+import socket, time
 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serverSocket.connect(("localhost", 8000))
@@ -29,9 +29,7 @@ while True:
                 message = ticketType + ":" + numTickets
                 serverSocket.sendall(message.encode())
                 receipt = serverSocket.recv(1024).decode()
-                print(receipt)
                 succeeded, numTickets = receipt.split(":", 1)
-                print(succeeded)
 
                 if succeeded == "success":
                     print("Purchased " + numTickets + " " + ticketType + " tickets.")

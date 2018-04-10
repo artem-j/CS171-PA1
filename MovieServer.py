@@ -1,60 +1,46 @@
-import socket, select, queue
+import socket, threading, time
+from _thread import *
 
 numTickets = 50
+myLock = threading.Lock()
 
-movieSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-movieSocket.setblocking(0)
-movieSocket.bind(("", 8000))
-movieSocket.listen(1)   # Change later
+theaterSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+theaterSocket.connect(("localhost", 8001))
 
-inputs = [movieSocket]
-outputs = []
-buffer = {}
+def ticketSale(connection):
+    global numTickets
+    while True:
+        data = connection.recv(1024).decode()
 
-while inputs:
-    read, write, error = select.select(inputs, outputs, inputs, 60000)
-
-    for sock in read:
-        if sock is movieSocket:
-            clientSocket, clientAddress = sock.accept()
-            clientSocket.setblocking(0)
-            inputs.append(clientSocket)
-            buffer[clientSocket] = queue.Queue()
-        else:
-            message = sock.recv(1024).decode()
-            if message:
-                buffer[sock].put(message)
-                if sock not in outputs:
-                    outputs.append(sock)
-            else:
-                if sock in outputs:
-                    outputs.remove(sock)
-                inputs.remove(sock)
-                sock.close()
-                del buffer[sock]
-
-    for sock in write:
-        try:
-            currentMessage = buffer[sock].get_nowait()
-        except queue.Empty:
-            outputs.remove(sock)
-        else:
-            ticketType, num = currentMessage.split(":", 1)
+        if data:
+            ticketType, num = data.split(":", 1)
             num = int(num)
-            # if ticketType is "play" --> send to playserver
-            # else:
-            if numTickets >= num:
-                numTickets -= num
-                receipt = "success:" + str(num)
+            if ticketType is "play":
+                theaterSocket.sendall(data.encode())
             else:
-                receipt = "failed:" + str(num)
+                myLock.acquire()
+                if numTickets >= num:
+                    numTickets -= num
+                    receipt = "success:" + str(num)
+                else:
+                    receipt = "failed:" + str(num)
+                time.sleep(5)
+                myLock.release()
 
-            sock.sendall(receipt.encode())
+            connection.sendall(receipt.encode())
+        else:
+            connection.close()
 
-    for sock in error:
-        inputs.remove(sock)
-        if sock in outputs:
-            outputs.remove(sock)
-        sock.close()
-        del buffer[sock]
+def Main():
+    kioskListener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    kioskListener.bind(("", 8000))
+    kioskListener.listen(1)   # Change later
 
+    while True:
+        connection, address = kioskListener.accept()
+        start_new_thread(ticketSale, (connection,))
+
+    kioskListener.close()
+
+if __name__ == '__main__':
+    Main()
