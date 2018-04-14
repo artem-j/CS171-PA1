@@ -1,7 +1,16 @@
 import socket, time
 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serverSocket.connect(("localhost", 8000))
+serverSocket.connect(("localhost", 8001))
+
+global kioskNum
+kioskNum = -1;
+message = "kioskhandshake"
+serverSocket.sendall(message.encode())
+kioskNum = int(serverSocket.recv(1024).decode())
+
+if kioskNum < 0:
+    print("Handshake failed")
 
 while True:
     ticketType = input("Enter ticket type (\'movie\' or \'play\'), or type \'quit\' to exit: ")
@@ -26,10 +35,10 @@ while True:
             if int(numTickets) < 0:
                 print("Error: Cannot purchase negative number of tickets")
             else:
-                message = ticketType + ":" + numTickets
+                message = str(kioskNum) + ":" + ticketType + ":" + str(numTickets)
                 serverSocket.sendall(message.encode())
                 receipt = serverSocket.recv(1024).decode()
-                succeeded, numTickets = receipt.split(":", 1)
+                origin, succeeded, numTickets = receipt.split(":", 2)
 
                 if succeeded == "success":
                     print("Purchased " + numTickets + " " + ticketType + " tickets.")
