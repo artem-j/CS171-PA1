@@ -1,7 +1,13 @@
 import socket, threading, time
 from _thread import *
 
-numTickets = 50
+configList = open("config.txt").read().splitlines()
+
+numTickets = int(configList[0].split(":")[1])
+
+theaterIP = configList[1].split(":")[1]
+theaterPort = int(configList[1].split(":")[2])
+
 kioskCounter = 0
 ticketLock = threading.Lock()
 
@@ -45,14 +51,14 @@ def ticketSale(connection):
                     if numTickets >= num:
                         numTickets -= num
                         receipt = "theaterServer:success:" + str(num)
-                        print("Sold " + str(num) + " tickets.")
+                        print("Sold " + str(num) + " tickets")
                     else:
                         receipt = "theaterServer:failed:" + str(num)
-                        print("Failed to sell " + str(num) + " tickets.")
+                        print("Failed to sell " + str(num) + " tickets")
 
                     ticketLock.release()
 
-                    print(str(numTickets) + " movie tickets remaining.")
+                    print(str(numTickets) + " movie tickets remaining")
 
                     #time.sleep(5)
                     connection.sendall(receipt.encode())
@@ -62,7 +68,7 @@ def ticketSale(connection):
 
 def Main():
     requestListener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    requestListener.bind(("", 8001))
+    requestListener.bind((theaterIP, theaterPort))
     requestListener.listen(1)
 
     global sendMovieSocket

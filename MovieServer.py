@@ -1,7 +1,16 @@
 import socket, threading, time
 from _thread import *
 
-numTickets = 50
+configList = open("config.txt").read().splitlines()
+
+numTickets = int(configList[0].split(":")[1])
+
+theaterIP = configList[1].split(":")[1]
+theaterPort = int(configList[1].split(":")[2])
+
+movieIP = configList[2].split(":")[1]
+moviePort = int(configList[2].split(":")[2])
+
 ticketLock = threading.Lock()
 sendTheaterSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 recvTheaterSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,14 +49,14 @@ def ticketSale(connection):
                 if numTickets >= num:
                     numTickets -= num
                     receipt = "movieServer:success:" + str(num)
-                    print("Sold " + str(num) + " tickets.")
+                    print("Sold " + str(num) + " tickets")
                 else:
                     receipt = "movieServer:failed:" + str(num)
-                    print("Failed to sell " + str(num) + " tickets.")
+                    print("Failed to sell " + str(num) + " tickets")
 
                 ticketLock.release()
 
-                print(str(numTickets) + " movie tickets remaining.")
+                print(str(numTickets) + " movie tickets remaining")
 
                 #time.sleep(5)
                 connection.sendall(receipt.encode())
@@ -57,12 +66,12 @@ def ticketSale(connection):
 
 def Main():
     requestListener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    requestListener.bind(("", 8000))
+    requestListener.bind((movieIP, moviePort))
     requestListener.listen(1)
 
     global sendTheaterSocket
-    recvTheaterSocket.connect(("localhost", 8001))
-    sendTheaterSocket.connect(("localhost", 8001))
+    recvTheaterSocket.connect((theaterIP, theaterPort))
+    sendTheaterSocket.connect((theaterIP, theaterPort))
     start_new_thread(ticketSale, (recvTheaterSocket,))
 
     while True:

@@ -6,6 +6,10 @@ theaterSocket.connect(("localhost", 8001))
 movieSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 movieSocket.connect(("localhost", 8000))
 
+configList = open("config.txt").read().splitlines()
+
+numTickets = configList[0].split(":")[1]
+
 global kioskNum
 kioskNum = -1;
 message = "kioskhandshake"

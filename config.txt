@@ -1,0 +1,3 @@
+defaultTickets:50
+theaterServerIP,port:127.0.0.1:8001
+movieServerIP,port:127.0.0.1:8000
