@@ -14,9 +14,16 @@ ticketLock = threading.Lock()
 def ticketSale(connection):
     global kioskCounter
     global numTickets
+    closed = True
 
     while True:
-        data = connection.recv(1024).decode()
+        try:
+            data = connection.recv(1024).decode()
+            closed = False
+        except:
+            if closed == False:
+            	print("A kiosk has closed its connection")
+            closed = True
 
         if data:
             if data == "kioskhandshake":
