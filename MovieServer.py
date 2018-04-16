@@ -43,7 +43,7 @@ def ticketSale(connection):
             if ticketType == "play":
                 data = "movieServer:" + ticketType + ":" + str(num)
 
-                #time.sleep(5)
+                time.sleep(5)
                 sendTheaterSocket.sendall(data.encode())
                 print("Request for " + str(num) + " tickets forwarded to theater server")
 
@@ -65,7 +65,7 @@ def ticketSale(connection):
 
                 print(str(numTickets) + " movie tickets remaining")
 
-                #time.sleep(5)
+                time.sleep(5)
                 connection.sendall(receipt.encode())
 
             else:
