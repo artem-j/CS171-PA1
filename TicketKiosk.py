@@ -1,14 +1,18 @@
 import socket, time, random
 
-theaterSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-theaterSocket.connect(("localhost", 8001))
-
-movieSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-movieSocket.connect(("localhost", 8000))
-
 configList = open("config.txt").read().splitlines()
 
-numTickets = configList[0].split(":")[1]
+theaterIP = configList[1].split(":")[1]
+theaterPort = int(configList[1].split(":")[2])
+
+movieIP = configList[2].split(":")[1]
+moviePort = int(configList[2].split(":")[2])
+
+theaterSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+theaterSocket.connect((theaterIP, theaterPort))
+
+movieSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+movieSocket.connect((movieIP, moviePort))
 
 global kioskNum
 kioskNum = -1;
