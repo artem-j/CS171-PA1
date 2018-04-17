@@ -65,7 +65,7 @@ def ticketSale(connection):
 
                     ticketLock.release()
 
-                    print(str(numTickets) + " movie tickets remaining")
+                    print(str(numTickets) + " play tickets remaining")
 
                     time.sleep(5)
                     connection.sendall(receipt.encode())
